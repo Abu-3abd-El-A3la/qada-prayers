@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#050b16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="قضاء الصلاة">
+<meta name="application-name" content="قضاء الصلاة">
+<meta name="description" content="تطبيق لمتابعة وتسجيل قضاء الصلوات الفائتة">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>قضاء الصلاة</title>
+<script>
+(function(){
+  try{
+    var raw = localStorage.getItem('qadaTheme');
+    var t = raw ? JSON.parse(raw) : null;
+    if(t === 'light'){ document.documentElement.setAttribute('data-theme','light'); }
+  }catch(e){}
+})();
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800&display=swap');
+
+  :root, html[data-theme="dark"]{
+    --bg1:#050b16;
+    --bg2:#0d2038;
+    --surface:#0f2338;
+    --surface-alt:#13293f;
+    --border:rgba(230,193,88,0.26);
+    --border-strong:rgba(230,193,88,0.5);
+    --text-primary:#f2ecd9;
+    --text-secondary:#9fb4c4;
+    --text-tertiary:#6f8497;
+    --gold:#caa227;
+    --gold-bright:#f0c860;
+    --gold-dim:#a6862a;
+    --sky:#5fc2ec;
+    --sky-dim:rgba(95,194,236,0.16);
+    --danger:#c0503f;
+    --danger-bright:#e0665a;
+    --pattern-line:rgba(230,193,88,0.06);
+    --shadow-card:0 10px 24px -12px rgba(0,0,0,.65);
+    --shadow-card-hover:0 18px 34px -14px rgba(0,0,0,.75), 0 0 0 1px rgba(230,193,88,.35);
+    --ink-on-gold:#1c1404;
+  }
+  html[data-theme="light"]{
+    --bg1:#fbf6e8;
+    --bg2:#f2e9d0;
+    --surface:#ffffff;
+    --surface-alt:#f7f1de;
+    --border:rgba(19,58,92,0.15);
+    --border-strong:rgba(19,58,92,0.3);
+    --text-primary:#16283a;
+    --text-secondary:#47607a;
+    --text-tertiary:#7891a5;
+    --gold:#b8901f;
+    --gold-bright:#9c7415;
+    --gold-dim:#8a6c18;
+    --sky:#1f7ea6;
+    --sky-dim:rgba(31,126,166,0.12);
+    --danger:#a4453a;
+    --danger-bright:#8f392f;
+    --pattern-line:rgba(184,144,31,0.05);
+    --shadow-card:0 8px 18px -10px rgba(20,40,60,.2);
+    --shadow-card-hover:0 14px 26px -12px rgba(20,40,60,.28), 0 0 0 1px rgba(184,144,31,.35);
+    --ink-on-gold:#241900;
+  }
+
+  *{box-sizing:border-box;}
+  [hidden] { display: none !important; }
+  html,body{margin:0;padding:0;}
+
+  body{
+    font-family:'Cairo','Segoe UI',Tahoma,sans-serif;
+    background:
+      radial-gradient(ellipse at 50% -10%, var(--bg2) 0%, var(--bg1) 55%),
+      var(--bg1);
+    color:var(--text-primary);
+    min-height:100vh;
+    padding:28px 16px 48px;
+    position:relative;
+    transition:background .3s ease, color .3s ease;
+  }
+
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, var(--pattern-line) 0 1px, transparent 1px 42px),
+      repeating-linear-gradient(-45deg, var(--pattern-line) 0 1px, transparent 1px 42px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{
+    position:relative;
+    z-index:1;
+    max-width:460px;
+    margin:0 auto;
+  }
+
+  /* ---------- shared icon badge ---------- */
+  .icon-badge{
+    width:44px; height:44px; flex:none;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--surface-alt);
+    border:1px solid var(--border);
+  }
+  .icon-badge svg{width:24px;height:24px;}
+  .icon-gold{color:var(--gold-bright);}
+  .icon-sky{color:var(--sky);}
+
+  /* ---------- Setup screen ---------- */
+  .setup-screen{
+    position:relative; z-index:1;
+    min-height:calc(100vh - 76px);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .setup-card{
+    width:100%; max-width:440px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:28px 22px 24px;
+    box-shadow:var(--shadow-card);
+    text-align:center;
+  }
+  .setup-card .crescent-logo{width:44px;height:44px;margin:0 auto 10px;color:var(--gold-bright);}
+  .setup-card .crescent-logo svg{width:100%;height:100%;}
+  .setup-title{font-family:'Amiri',serif;font-weight:700;font-size:1.9rem;color:var(--gold-bright);margin:4px 0 8px;}
+  .setup-desc{font-size:.86rem;color:var(--text-secondary);line-height:1.75;margin:0;}
+  .setup-form{margin-top:14px;text-align:right;}
+  .setup-list{display:flex;flex-direction:column;gap:10px;}
+  .setup-row{
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface-alt);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:8px 10px;
+  }
+  .setup-row .icon-badge{width:38px;height:38px;}
+  .setup-row .icon-badge svg{width:20px;height:20px;}
+  .setup-row label{flex:1;font-weight:700;font-size:.92rem;}
+  .setup-row input{
+    width:92px;
+    font-family:'Cairo',sans-serif;
+    font-size:1rem;
+    font-weight:700;
+    text-align:center;
+    padding:9px 6px;
+    border-radius:9px;
+    border:1px solid var(--border-strong);
+    background:var(--surface);
+    color:var(--text-primary);
+  }
+  .setup-submit{width:100%;margin-top:18px;padding:13px;font-size:1rem;}
+
+  /* ---------- Header ---------- */
+  header{position:relative;z-index:1;text-align:center;padding-bottom:6px;}
+
+  .theme-toggle-btn{
+    position:absolute; top:0; left:0;
+    width:38px; height:38px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--gold-bright);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:transform .3s ease, background .2s ease;
+    padding:0;
+  }
+  .theme-toggle-btn svg{width:19px;height:19px;}
+  @media (hover:hover) and (pointer:fine){
+    .theme-toggle-btn:hover{transform:rotate(18deg);background:var(--surface-alt);}
+  }
+
+  .crescent-logo{
+    width:46px; height:46px; margin:0 auto 10px; color:var(--gold-bright);
+    opacity:0; animation:riseIn .7s ease-out forwards;
+  }
+  .crescent-logo svg{width:100%;height:100%;}
+
+  h1{
+    font-family:'Amiri',serif; font-weight:700; font-size:2.1rem;
+    color:var(--gold-bright); letter-spacing:1px; margin:0 0 4px;
+    opacity:0; animation:riseIn .7s ease-out .1s forwards;
+  }
+  .subtitle{
+    font-size:.92rem; color:var(--text-secondary); margin:0;
+    opacity:0; animation:riseIn .7s ease-out .2s forwards;
+  }
+
+  .dua-box{
+    position:relative; max-width:340px; margin:16px auto 2px; text-align:center; padding:0 10px;
+    opacity:0; animation:riseIn .7s ease-out .28s forwards;
+  }
+  .dua-line{width:56%;height:1px;margin:0 auto 9px;background:linear-gradient(90deg, transparent, var(--gold), transparent);}
+  .dua-line.bottom{margin:9px auto 0;}
+  .dua-text{font-family:'Amiri',serif;font-size:1rem;line-height:2;color:var(--gold-dim);margin:0;}
+
+  .divider{
+    width:0; height:1px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin:16px auto 0;
+    animation:drawIn .9s ease-out .4s forwards;
+  }
+
+  @keyframes riseIn{from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);}}
+  @keyframes drawIn{from{width:0;} to{width:78%;}}
+
+  /* ---------- Nudge banner ---------- */
+  .nudge{
+    background:var(--sky-dim);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-top:18px;
+    text-align:center;
+  }
+  .nudge strong{display:block;color:var(--sky);font-size:.95rem;margin-bottom:2px;}
+  .nudge span{font-size:.8rem;color:var(--text-secondary);}
+
+  /* ---------- Total card ---------- */
+  .total-card{
+    position:relative;
+    margin-top:20px;
+    padding:26px 20px 22px;
+    border-radius:22px;
+    background:linear-gradient(160deg, var(--surface-alt), var(--surface) 70%);
+    border:1px solid var(--border-strong);
+    text-align:center;
+    box-shadow:0 0 0 4px var(--sky-dim), var(--shadow-card);
+  }
+  .corner{position:absolute;width:14px;height:14px;opacity:.85;color:var(--gold);}
+  .corner svg{width:100%;height:100%;}
+  .corner.tl{top:10px;right:10px;} .corner.tr{top:10px;left:10px;}
+  .corner.bl{bottom:10px;right:10px;} .corner.br{bottom:10px;left:10px;}
+
+  .total-label{font-size:.85rem;color:var(--text-secondary);margin:0 0 6px;}
+  .total-number{font-size:3rem;font-weight:800;color:var(--gold-bright);line-height:1;transition:transform .25s ease;}
+  .total-number.pulse{transform:scale(1.08);}
+  .total-activity{margin-top:10px;font-size:.78rem;color:var(--text-tertiary);}
+
+  .progress-wrap{margin-top:16px;}
+  .progress-track{height:10px;border-radius:999px;background:var(--surface);border:1px solid var(--border);overflow:hidden;}
+  .progress-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg, var(--sky), var(--gold-bright));transition:width .5s ease;}
+  .progress-label{margin-top:6px;font-size:.74rem;color:var(--text-secondary);}
+
+  /* ---------- Prayer cards ---------- */
+  .prayers-list{margin-top:20px;display:flex;flex-direction:column;gap:12px;}
+
+  .prayer-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:14px 16px;
+    color:var(--text-primary);
+    box-shadow:var(--shadow-card);
+    transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .25s ease;
+  }
+  .prayer-card.done{background:var(--surface-alt);}
+  .prayer-card.flash{box-shadow:0 0 0 3px var(--border-strong), var(--shadow-card);}
+  @media (hover:hover) and (pointer:fine){
+    .prayer-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-card-hover);border-color:var(--border-strong);}
+  }
+
+  .prayer-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .prayer-name-wrap{display:flex;align-items:center;gap:10px;}
+  .prayer-name{font-weight:700;font-size:1.02rem;color:var(--text-primary);}
+  .updated-chip{font-size:.68rem;color:var(--sky);background:var(--sky-dim);padding:4px 9px;border-radius:999px;white-space:nowrap;}
+
+  .prayer-mid{display:flex;align-items:baseline;gap:8px;margin-top:12px;}
+  .prayer-count{font-size:2.05rem;font-weight:800;color:var(--gold-bright);transition:transform .2s ease;}
+  .prayer-count.pulse{transform:scale(1.12);}
+  .prayer-count-label{font-size:.78rem;color:var(--text-secondary);}
+
+  .prayer-edit-row{display:none;align-items:center;gap:8px;margin-top:10px;}
+  .prayer-edit-row.active{display:flex;}
+  .prayer-edit-row input{
+    width:100px;font-family:'Cairo',sans-serif;font-size:1.1rem;font-weight:700;
+    padding:7px 10px;border-radius:8px;border:1px solid var(--border-strong);
+    background:var(--surface-alt);color:var(--text-primary);
+  }
+
+  .prayer-actions{display:flex;align-items:center;gap:8px;margin-top:12px;}
+  .btn{
+    font-family:'Cairo',sans-serif;border:none;cursor:pointer;border-radius:10px;
+    font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    transition:filter .15s ease, transform .1s ease, background .2s ease;
+  }
+  .btn:active{transform:scale(.96);}
+
+  .btn-primary{flex:1;background:linear-gradient(160deg, var(--gold-bright), var(--gold));color:var(--ink-on-gold);padding:11px 12px;font-size:.92rem;}
+  @media (hover:hover) and (pointer:fine){.btn-primary:hover{filter:brightness(1.08);}}
+
+  .btn-icon{width:38px;height:38px;flex:none;background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary);}
+  .btn-icon svg{width:17px;height:17px;}
+  @media (hover:hover) and (pointer:fine){.btn-icon:hover{background:var(--surface-alt);color:var(--text-primary);}}
+
+  .btn-confirm{background:var(--sky);color:#06222e;border-color:transparent;}
+  .btn-cancel{background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary);}
+  .btn-danger{background:linear-gradient(160deg, var(--danger-bright), var(--danger));color:#fff;}
+  @media (hover:hover) and (pointer:fine){.btn-danger:hover{filter:brightness(1.1);}}
+
+  .done-note{margin-top:12px;font-size:.85rem;color:var(--gold-dim);font-weight:700;}
+
+  /* ---------- History & chart ---------- */
+  .section-title{font-family:'Amiri',serif;font-size:1.2rem;color:var(--gold-bright);margin:26px 0 12px;text-align:center;}
+
+  .history-stats{display:flex;gap:10px;}
+  .stat-chip{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow-card);}
+  .stat-num{display:block;font-size:1.35rem;font-weight:800;color:var(--gold-bright);}
+  .stat-label{display:block;font-size:.7rem;color:var(--text-secondary);margin-top:3px;}
+
+  .chart-card{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 14px 10px;box-shadow:var(--shadow-card);}
+  .chart-title{font-size:.85rem;color:var(--text-secondary);margin:0 0 6px;text-align:center;}
+  .chart-bars{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:16px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bar-value{font-size:.66rem;color:var(--text-secondary);margin-bottom:4px;min-height:12px;}
+  .bar-track{width:100%;max-width:22px;height:78px;background:var(--surface-alt);border-radius:6px;border:1px solid var(--border);display:flex;align-items:flex-end;overflow:hidden;}
+  .bar-fill{width:100%;height:4%;background:linear-gradient(180deg, var(--gold-bright), var(--sky));border-radius:6px 6px 0 0;transition:height .5s ease;}
+  .bar-day{font-size:.64rem;color:var(--text-tertiary);margin-top:6px;}
+  .bar-col.is-today .bar-day{color:var(--gold-bright);font-weight:700;}
+  .bar-col.is-today .bar-track{border-color:var(--border-strong);}
+
+  .history-list-card{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow-card);}
+  .history-list-title{font-size:.85rem;color:var(--text-secondary);margin:0 0 8px;}
+  .history-list{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;}
+  .history-row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border);}
+  .history-row:last-child{border-bottom:none;}
+  .history-row .icon-badge{width:34px;height:34px;}
+  .history-row .icon-badge svg{width:18px;height:18px;}
+  .history-text{flex:1;min-width:0;}
+  .history-main{margin:0;font-size:.86rem;font-weight:700;color:var(--text-primary);}
+  .history-meta{margin:2px 0 0;font-size:.72rem;color:var(--text-tertiary);}
+  .history-empty{text-align:center;font-size:.82rem;color:var(--text-tertiary);padding:14px 6px;line-height:1.7;}
+  .history-note{font-size:.68rem;color:var(--text-tertiary);text-align:center;margin:8px 0 0;}
+
+  /* ---------- Reminder card ---------- */
+  .reminder-card{
+    margin-top:22px;
+    background:linear-gradient(160deg, var(--surface-alt), var(--surface));
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px 18px;
+    box-shadow:var(--shadow-card);
+  }
+  .reminder-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .reminder-title{font-size:.98rem;font-weight:700;color:var(--gold-bright);}
+  .reminder-desc{font-size:.78rem;color:var(--text-secondary);margin-top:2px;}
+
+  .switch{position:relative;width:46px;height:26px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch-track{position:absolute;inset:0;background:var(--surface);border:1px solid var(--border-strong);border-radius:999px;cursor:pointer;transition:background .2s ease;}
+  .switch-track::before{content:'';position:absolute;width:20px;height:20px;left:2px;top:2px;background:var(--text-secondary);border-radius:50%;transition:transform .2s ease, background .2s ease;}
+  .switch input:checked + .switch-track{background:var(--sky-dim);border-color:var(--sky);}
+  .switch input:checked + .switch-track::before{transform:translateX(-20px);background:var(--sky);}
+
+  .reminder-freq{margin-top:12px;display:none;}
+  .reminder-freq.active{display:block;}
+  .reminder-freq select{
+    width:100%;font-family:'Cairo',sans-serif;font-size:.88rem;padding:9px 10px;
+    border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-primary);
+  }
+  .reminder-freq select option{color:#000;}
+
+  .reminder-note{margin-top:10px;font-size:.72rem;color:var(--text-tertiary);line-height:1.6;}
+
+  /* ---------- Danger zone ---------- */
+  .danger-zone{margin-top:22px;text-align:center;}
+  .reset-btn{padding:11px 22px;font-size:.85rem;}
+  .danger-hint{font-size:.7rem;color:var(--text-tertiary);margin-top:8px;line-height:1.6;}
+
+  /* ---------- Footer ---------- */
+  .footer-tip{margin-top:18px;text-align:center;font-size:.72rem;color:var(--text-tertiary);line-height:1.6;}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--surface);border:1px solid var(--border-strong);color:var(--text-primary);
+    padding:10px 18px;border-radius:999px;font-size:.82rem;opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;z-index:30;white-space:nowrap;box-shadow:var(--shadow-card);
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:40;}
+  .modal-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border-strong);border-radius:18px;padding:22px 20px;text-align:center;box-shadow:var(--shadow-card-hover);}
+  .modal-title{font-family:'Amiri',serif;font-size:1.15rem;color:var(--gold-bright);margin:0 0 8px;}
+  .modal-msg{font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin:0 0 18px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions .btn{flex:1;padding:11px;font-size:.88rem;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;transition-duration:.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+  <div id="setupScreen" class="setup-screen" hidden>
+    <div class="setup-card">
+      <div class="crescent-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M14.5 3.5a8.5 8.5 0 1 0 6 8.9A7 7 0 0 1 14.5 3.5z" fill="currentColor" fill-opacity="0.18"/>
+          <circle cx="19" cy="6" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <h1 class="setup-title">قضاء الصلاة</h1>
+      <p class="setup-desc">قبل ما نبدأ، اكتب عدد الصلوات الفايتة عليك في كل صلاة. الأرقام دي هتبقى نقطة البداية بتاعتك، وتقدر تعدّلها بعدين وقت ما تحب.</p>
+      <div class="dua-box">
+        <div class="dua-line"></div>
+        <p class="dua-text">اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ</p>
+        <div class="dua-line bottom"></div>
+      </div>
+      <form id="setupForm" class="setup-form">
+        <div class="setup-list" id="setupList"></div>
+        <button type="submit" class="btn btn-primary setup-submit">ابدأ المتابعة</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="appScreen" class="wrap" hidden>
+    <header>
+      <button class="theme-toggle-btn" id="themeToggleBtn" type="button" aria-label="تبديل الوضع"></button>
+
+      <div class="crescent-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M14.5 3.5a8.5 8.5 0 1 0 6 8.9A7 7 0 0 1 14.5 3.5z" fill="currentColor" fill-opacity="0.18"/>
+          <circle cx="19" cy="6" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <h1>قضاء الصلاة</h1>
+      <p class="subtitle">تابع اللي لسه فاضلك تقضيه</p>
+
+      <div class="dua-box">
+        <div class="dua-line"></div>
+        <p class="dua-text">اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ</p>
+        <div class="dua-line bottom"></div>
+      </div>
+
+      <div class="divider"></div>
+    </header>
+
+    <div id="nudge" class="nudge" hidden>
+      <strong>لسه ما سجّلتش حاجة النهاردة</strong>
+      <span>أول ما تقضي صلاة، سجّلها هنا</span>
+    </div>
+
+    <section class="total-card">
+      <div class="corner tl"><svg viewBox="0 0 20 20"><path d="M10 0l2.2 5.8L18 8l-5.8 2.2L10 16l-2.2-5.8L2 8l5.8-2.2z" fill="currentColor"/></svg></div>
+      <div class="corner tr"><svg viewBox="0 0 20 20"><path d="M10 0l2.2 5.8L18 8l-5.8 2.2L10 16l-2.2-5.8L2 8l5.8-2.2z" fill="currentColor"/></svg></div>
+      <div class="corner bl"><svg viewBox="0 0 20 20"><path d="M10 0l2.2 5.8L18 8l-5.8 2.2L10 16l-2.2-5.8L2 8l5.8-2.2z" fill="currentColor"/></svg></div>
+      <div class="corner br"><svg viewBox="0 0 20 20"><path d="M10 0l2.2 5.8L18 8l-5.8 2.2L10 16l-2.2-5.8L2 8l5.8-2.2z" fill="currentColor"/></svg></div>
+      <p class="total-label">الإجمالي المتبقي</p>
+      <div class="total-number" id="totalNumber">0</div>
+      <p class="total-activity" id="totalActivity">لسه ما سجّلتش أي صلاة</p>
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="progress-label" id="progressLabel">0% خلصت</p>
+      </div>
+    </section>
+
+    <section class="prayers-list" id="prayersList"></section>
+
+    <section class="history-section">
+      <h2 class="section-title">سجل المتابعة</h2>
+
+      <div class="history-stats">
+        <div class="stat-chip"><span class="stat-num" id="statTotal">0</span><span class="stat-label">تم قضاؤه</span></div>
+        <div class="stat-chip"><span class="stat-num" id="statToday">0</span><span class="stat-label">النهاردة</span></div>
+        <div class="stat-chip"><span class="stat-num" id="stat7">0</span><span class="stat-label">آخر 7 أيام</span></div>
+      </div>
+
+      <div class="chart-card">
+        <p class="chart-title">معدل الإنجاز في آخر 7 أيام</p>
+        <div class="chart-bars" id="chartBars" dir="ltr"></div>
+      </div>
+
+      <div class="history-list-card">
+        <p class="history-list-title">آخر التسجيلات</p>
+        <div class="history-list" id="historyList"></div>
+        <p class="history-note" id="historyNote" hidden>بيظهر آخر 50 عملية قضاء بس</p>
+      </div>
+    </section>
+
+    <section class="reminder-card">
+      <div class="reminder-head">
+        <div>
+          <div class="reminder-title">تذكير بالتسجيل</div>
+          <div class="reminder-desc">يفكّرك تسجّل قضاء الصلوات بانتظام</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="reminderToggle">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+      <div class="reminder-freq" id="reminderFreqWrap">
+        <select id="reminderFreq">
+          <option value="3">كل 3 ساعات</option>
+          <option value="6">كل 6 ساعات</option>
+          <option value="24">مرة في اليوم</option>
+        </select>
+      </div>
+      <p class="reminder-note" id="reminderNote">التذكير بيشتغل بإشعارات المتصفح طول ما الصفحة مفتوحة عندك في تبويب. لو حوّلت التطبيق لـ APK، فعاليته هتعتمد على دعم الإشعارات في أداة التغليف اللي هتستخدمها.</p>
+    </section>
+
+    <div class="danger-zone">
+      <button class="btn btn-danger reset-btn" id="resetBtn" type="button">تصفير كل البيانات</button>
+      <p class="danger-hint">هيمسح كل الأرقام والسجل ويرجعك لشاشة إدخال الأرقام من الأول</p>
+    </div>
+
+    <p class="footer-tip">تلميح: تقدر تضيف الصفحة دي للشاشة الرئيسية في تليفونك عشان توصلها بسرعة أول ما تحتاجها.</p>
+  </div>
+
+  <div id="confirmModal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <p class="modal-title">تصفير كل البيانات؟</p>
+      <p class="modal-msg">هيتم مسح كل الأرقام والسجل والتفضيلات المحفوظة، وهترجع لشاشة الإعداد الأولى تكتب أرقامك تاني. الخطوة دي مش هتتراجع.</p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="modalCancelBtn" type="button">إلغاء</button>
+        <button class="btn btn-danger" id="modalConfirmBtn" type="button">تصفير فعلاً</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var LS_STATE = 'qadaState';
+  var LS_HISTORY = 'qadaHistory';
+  var LS_REMINDER = 'qadaReminder';
+  var LS_THEME = 'qadaTheme';
+
+  var CONFIG = [
+    {key:'fajr', name:'الفجر', cls:'icon-gold'},
+    {key:'dhuhr', name:'الظهر', cls:'icon-gold'},
+    {key:'asr', name:'العصر', cls:'icon-gold'},
+    {key:'maghrib', name:'المغرب', cls:'icon-gold'},
+    {key:'isha', name:'العشاء', cls:'icon-sky'}
+  ];
+
+  var ICONS = {
+    fajr: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 23h22"/><path d="M10 23a6 6 0 0 1 12 0" fill="currentColor" fill-opacity="0.2"/><path d="M16 12v3"/><path d="M10.8 15.8l1.8 1.8"/><path d="M21.2 15.8l-1.8 1.8"/><circle cx="24" cy="9" r="0.9" fill="currentColor" stroke="none"/><circle cx="21" cy="7" r="0.6" fill="currentColor" stroke="none" opacity="0.6"/></svg>',
+    dhuhr: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="6" fill="currentColor" fill-opacity="0.22"/><path d="M16 3v3.4M16 25.6V29M3 16h3.4M25.6 16H29"/><path d="M7.5 7.5l2.4 2.4M22.1 22.1l2.4 2.4M24.5 7.5l-2.4 2.4M9.9 22.1l-2.4 2.4"/></svg>',
+    asr: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="14" r="5.4" fill="currentColor" fill-opacity="0.22"/><path d="M14 4.5v3M6 14H3M25 19H14"/><path d="M7.7 7.7l2.1 2.1M20.3 7.7l-2.1 2.1"/><path d="M4 25h20" stroke-opacity="0.55"/></svg>',
+    maghrib: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 24h24"/><path d="M9.5 24a6.5 6.5 0 0 1 13 0" fill="currentColor" fill-opacity="0.22"/><path d="M16 12.5v2.2M11 15.5l1.3 1.3M21 15.5l-1.3 1.3"/><path d="M8 20.3h16" stroke-opacity="0.5"/></svg>',
+    isha: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 6.3a9 9 0 1 0 6 10.4A7.3 7.3 0 0 1 20.5 6.3z" fill="currentColor" fill-opacity="0.24"/><path d="M8 9.5v2.6M6.7 10.8h2.6" stroke-width="1.3"/><circle cx="24" cy="21" r="0.9" fill="currentColor" stroke="none"/><circle cx="9" cy="21" r="0.6" fill="currentColor" stroke="none" opacity="0.7"/></svg>'
+  };
+
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  var XMARK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  var UNDO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>';
+  var EDIT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  var SUN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>';
+  var MOON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z" fill="currentColor" fill-opacity="0.15"/></svg>';
+
+  var state = null;
+  var history = [];
+  var reminderSettings = {enabled:false, hours:6};
+  var reminderTimer = null;
+
+  function $(id){ return document.getElementById(id); }
+
+  var setupScreenEl = $('setupScreen');
+  var appScreenEl = $('appScreen');
+  var setupListEl = $('setupList');
+  var setupFormEl = $('setupForm');
+  var listEl = $('prayersList');
+  var totalEl = $('totalNumber');
+  var totalActivityEl = $('totalActivity');
+  var progressFillEl = $('progressFill');
+  var progressLabelEl = $('progressLabel');
+  var nudgeEl = $('nudge');
+  var toastEl = $('toast');
+  var statTotalEl = $('statTotal');
+  var statTodayEl = $('statToday');
+  var stat7El = $('stat7');
+  var chartBarsEl = $('chartBars');
+  var historyListEl = $('historyList');
+  var historyNoteEl = $('historyNote');
+  var themeToggleBtn = $('themeToggleBtn');
+  var resetBtn = $('resetBtn');
+  var confirmModalEl = $('confirmModal');
+  var modalCancelBtn = $('modalCancelBtn');
+  var modalConfirmBtn = $('modalConfirmBtn');
+  var reminderToggleEl = $('reminderToggle');
+  var reminderFreqWrapEl = $('reminderFreqWrap');
+  var reminderFreqEl = $('reminderFreq');
+  var reminderNoteEl = $('reminderNote');
+
+  /* ---------- storage helpers (standard localStorage) ---------- */
+  function storageAvailable(){
+    try{
+      var t = '__qada_test__';
+      localStorage.setItem(t, '1');
+      localStorage.removeItem(t);
+      return true;
+    }catch(e){ return false; }
+  }
+  var hasStorage = storageAvailable();
+
+  function lsGet(key){
+    if(!hasStorage) return null;
+    try{
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  function lsSet(key, value){
+    if(!hasStorage) return false;
+    try{
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    }catch(e){
+      showToast('حصل خطأ في الحفظ المحلي');
+      return false;
+    }
+  }
+  function lsRemove(key){
+    if(!hasStorage) return;
+    try{ localStorage.removeItem(key); }catch(e){}
+  }
+
+  function nameOf(key){
+    for(var i=0;i<CONFIG.length;i++){ if(CONFIG[i].key === key) return CONFIG[i].name; }
+    return key;
+  }
+  function classOf(key){
+    for(var i=0;i<CONFIG.length;i++){ if(CONFIG[i].key === key) return CONFIG[i].cls; }
+    return 'icon-gold';
+  }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+
+  function formatNumber(n){ return n.toLocaleString('en-US'); }
+
+  function formatDateTime(iso){
+    if(!iso) return null;
+    var d = new Date(iso);
+    var now = new Date();
+    var isToday = d.toDateString() === now.toDateString();
+    var yest = new Date(now); yest.setDate(now.getDate()-1);
+    var isYesterday = d.toDateString() === yest.toDateString();
+    var timeStr = d.toLocaleTimeString('ar-EG-u-nu-latn', {hour:'2-digit', minute:'2-digit'});
+    if(isToday) return 'النهاردة الساعة ' + timeStr;
+    if(isYesterday) return 'إمبارح الساعة ' + timeStr;
+    var dateStr = d.toLocaleDateString('ar-EG-u-nu-latn', {day:'numeric', month:'long'});
+    return dateStr + ' - ' + timeStr;
+  }
+
+  function formatHistoryMeta(iso){
+    var d = new Date(iso);
+    var now = new Date();
+    var timeStr = d.toLocaleTimeString('ar-EG-u-nu-latn', {hour:'2-digit', minute:'2-digit'});
+    var isToday = d.toDateString() === now.toDateString();
+    var yest = new Date(now); yest.setDate(now.getDate()-1);
+    var isYesterday = d.toDateString() === yest.toDateString();
+    var dayLabel;
+    if(isToday) dayLabel = 'النهاردة';
+    else if(isYesterday) dayLabel = 'إمبارح';
+    else dayLabel = 'يوم ' + d.toLocaleDateString('ar-EG', {weekday:'long'});
+    return dayLabel + ' \u00B7 ' + timeStr;
+  }
+
+  /* ---------- theme ---------- */
+  function currentTheme(){
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-theme', theme);
+    lsSet(LS_THEME, theme);
+    themeToggleBtn.innerHTML = theme === 'dark' ? SUN_SVG : MOON_SVG;
+    themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'التبديل للوضع النهاري' : 'التبديل للوضع الليلي');
+  }
+  themeToggleBtn.addEventListener('click', function(){
+    applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+  });
+
+  /* ---------- setup screen ---------- */
+  function buildSetupList(){
+    setupListEl.innerHTML = CONFIG.map(function(p){
+      return (
+        '<div class="setup-row">' +
+          '<span class="icon-badge ' + p.cls + '">' + ICONS[p.key] + '</span>' +
+          '<label for="setup-' + p.key + '">' + p.name + '</label>' +
+          '<input type="number" inputmode="numeric" min="0" id="setup-' + p.key + '" placeholder="0">' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  setupFormEl.addEventListener('submit', function(e){
+    e.preventDefault();
+    var newState = {};
+    CONFIG.forEach(function(p){
+      var input = $('setup-' + p.key);
+      var val = parseInt(input.value, 10);
+      if(isNaN(val) || val < 0) val = 0;
+      newState[p.key] = {count: val, initial: val, updated: null};
+    });
+    state = newState;
+    history = [];
+    lsSet(LS_STATE, state);
+    lsSet(LS_HISTORY, history);
+    enterApp();
+    showToast('بدأنا! ربنا يعينك على القضاء');
+  });
+
+  function showSetupScreen(){
+    buildSetupList();
+    setupScreenEl.hidden = false;
+    appScreenEl.hidden = true;
+  }
+  function enterApp(){
+    setupScreenEl.hidden = true;
+    appScreenEl.hidden = false;
+    render();
+    setReminderUI();
+  }
+
+  /* ---------- render ---------- */
+  function computeTotals(){
+    var total = 0, initialTotal = 0;
+    CONFIG.forEach(function(p){
+      total += state[p.key].count;
+      initialTotal += state[p.key].initial;
+    });
+    return {total:total, initialTotal:initialTotal};
+  }
+
+  function render(){
+    if(!state) return;
+    var t = computeTotals();
+    totalEl.textContent = formatNumber(t.total);
+
+    var latest = null;
+    CONFIG.forEach(function(p){
+      var u = state[p.key].updated;
+      if(u && (!latest || new Date(u) > new Date(latest))) latest = u;
+    });
+    if(t.total === 0 && t.initialTotal > 0){
+      totalActivityEl.textContent = 'الحمد لله، خلصت كل الصلوات المتأخرة عليك';
+    } else {
+      totalActivityEl.textContent = latest ? ('آخر تسجيل: ' + formatDateTime(latest)) : 'لسه ما سجّلتش أي صلاة';
+    }
+
+    var percent = t.initialTotal > 0 ? Math.max(0, Math.min(100, Math.round(((t.initialTotal - t.total) / t.initialTotal) * 100))) : 100;
+    progressFillEl.style.width = percent + '%';
+    progressLabelEl.textContent = percent + '% خلصت';
+
+    var todayStr0 = new Date().toDateString();
+    var anyToday = CONFIG.some(function(p){
+      var u = state[p.key].updated;
+      return u && new Date(u).toDateString() === todayStr0;
+    });
+    nudgeEl.hidden = anyToday || t.total === 0;
+
+    listEl.innerHTML = CONFIG.map(function(p){
+      var d = state[p.key];
+      var isDone = d.count <= 0;
+      var updatedText = formatDateTime(d.updated) || 'لسه ما سجّلتش';
+      return (
+        '<div class="prayer-card' + (isDone ? ' done' : '') + '" data-key="' + p.key + '">' +
+          '<div class="prayer-top">' +
+            '<div class="prayer-name-wrap">' +
+              '<span class="icon-badge ' + p.cls + '">' + ICONS[p.key] + '</span>' +
+              '<span class="prayer-name">' + p.name + '</span>' +
+            '</div>' +
+            '<span class="updated-chip">' + updatedText + '</span>' +
+          '</div>' +
+
+          '<div class="prayer-mid" data-role="display">' +
+            '<span class="prayer-count">' + formatNumber(d.count) + '</span>' +
+            '<span class="prayer-count-label">لسه فاضل</span>' +
+          '</div>' +
+
+          '<div class="prayer-edit-row" data-role="edit">' +
+            '<input type="number" min="0" data-role="edit-input" value="' + d.count + '">' +
+            '<button class="btn btn-icon btn-confirm" data-action="confirm-edit" aria-label="تأكيد">' + CHECK_SVG + '</button>' +
+            '<button class="btn btn-icon btn-cancel" data-action="cancel-edit" aria-label="إلغاء">' + XMARK_SVG + '</button>' +
+          '</div>' +
+
+          (isDone ?
+            ('<p class="done-note">قضيت كل صلوات ' + p.name + ' \u2713</p>' +
+             '<div class="prayer-actions">' +
+               '<button class="btn btn-icon" data-action="undo" aria-label="تراجع">' + UNDO_SVG + '</button>' +
+               '<button class="btn btn-icon" data-action="edit" aria-label="تعديل العدد">' + EDIT_SVG + '</button>' +
+             '</div>')
+          :
+            ('<div class="prayer-actions">' +
+               '<button class="btn btn-primary" data-action="decrement">قضيت واحدة</button>' +
+               '<button class="btn btn-icon" data-action="undo" aria-label="تراجع">' + UNDO_SVG + '</button>' +
+               '<button class="btn btn-icon" data-action="edit" aria-label="تعديل العدد">' + EDIT_SVG + '</button>' +
+             '</div>')
+          ) +
+        '</div>'
+      );
+    }).join('');
+
+    renderHistory();
+  }
+
+  function renderHistory(){
+    var now = new Date();
+    var todayStr = now.toDateString();
+    var weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 6); weekAgo.setHours(0,0,0,0);
+
+    var todayCount = 0, weekCount = 0;
+    history.forEach(function(h){
+      var d = new Date(h.ts);
+      if(d.toDateString() === todayStr) todayCount++;
+      if(d >= weekAgo) weekCount++;
+    });
+    statTotalEl.textContent = formatNumber(history.length);
+    statTodayEl.textContent = formatNumber(todayCount);
+    stat7El.textContent = formatNumber(weekCount);
+
+    var days = [];
+    var maxCount = 1;
+    var i;
+    for(i=6;i>=0;i--){
+      var d2 = new Date(now); d2.setDate(now.getDate() - i); d2.setHours(0,0,0,0);
+      var dStr = d2.toDateString();
+      var count = history.filter(function(h){ return new Date(h.ts).toDateString() === dStr; }).length;
+      if(count > maxCount) maxCount = count;
+      days.push({date:d2, count:count, isToday: i===0});
+    }
+    var weekdayShort = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+    chartBarsEl.innerHTML = days.map(function(day){
+      var pct = day.count > 0 ? Math.max(6, Math.round((day.count / maxCount) * 100)) : 3;
+      var label = weekdayShort[day.date.getDay()];
+      return (
+        '<div class="bar-col' + (day.isToday ? ' is-today' : '') + '">' +
+          '<span class="bar-value">' + (day.count > 0 ? day.count : '') + '</span>' +
+          '<div class="bar-track"><div class="bar-fill" style="height:' + pct + '%"></div></div>' +
+          '<span class="bar-day">' + label + '</span>' +
+        '</div>'
+      );
+    }).join('');
+
+    if(history.length === 0){
+      historyListEl.innerHTML = '<p class="history-empty">لسه معملتش أي تسجيل. أول ما تدوس "قضيت واحدة" هتلاقي كل حاجة متسجلة هنا تلقائي.</p>';
+      historyNoteEl.hidden = true;
+    } else {
+      var recent = history.slice(-50).slice().reverse();
+      historyListEl.innerHTML = recent.map(function(h){
+        return (
+          '<div class="history-row">' +
+            '<span class="icon-badge ' + classOf(h.key) + '">' + ICONS[h.key] + '</span>' +
+            '<div class="history-text">' +
+              '<p class="history-main">تم قضاء صلاة ' + h.name + '</p>' +
+              '<p class="history-meta">' + formatHistoryMeta(h.ts) + '</p>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+      historyNoteEl.hidden = history.length <= 50;
+    }
+  }
+
+  function pulseCard(key){
+    var card = listEl.querySelector('.prayer-card[data-key="' + key + '"]');
+    if(!card) return;
+    card.classList.add('flash');
+    var count = card.querySelector('.prayer-count');
+    if(count) count.classList.add('pulse');
+    totalEl.classList.add('pulse');
+    setTimeout(function(){
+      card.classList.remove('flash');
+      if(count) count.classList.remove('pulse');
+      totalEl.classList.remove('pulse');
+    }, 260);
+  }
+
+  function applyChange(key, newCount, opts){
+    opts = opts || {};
+    if(newCount < 0) newCount = 0;
+    var prev = state[key].count;
+    state[key].count = newCount;
+    state[key].updated = new Date().toISOString();
+    if(opts.bumpInitial && newCount > state[key].initial){
+      state[key].initial = newCount;
+    }
+    if(opts.logCompleted && newCount < prev){
+      history.push({key:key, name:nameOf(key), ts:new Date().toISOString()});
+      lsSet(LS_HISTORY, history);
+    }
+    lsSet(LS_STATE, state);
+    render();
+    pulseCard(key);
+  }
+
+  listEl.addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    var card = e.target.closest('.prayer-card');
+    var key = card.getAttribute('data-key');
+    var action = btn.getAttribute('data-action');
+
+    if(action === 'decrement'){
+      applyChange(key, state[key].count - 1, {logCompleted:true});
+    } else if(action === 'undo'){
+      applyChange(key, state[key].count + 1, {});
+    } else if(action === 'edit'){
+      card.querySelector('[data-role="display"]').style.display = 'none';
+      var editRow = card.querySelector('[data-role="edit"]');
+      editRow.classList.add('active');
+      var input = editRow.querySelector('input');
+      input.value = state[key].count;
+      input.focus();
+      input.select();
+    } else if(action === 'cancel-edit'){
+      card.querySelector('[data-role="display"]').style.display = '';
+      card.querySelector('[data-role="edit"]').classList.remove('active');
+    } else if(action === 'confirm-edit'){
+      var val = parseInt(card.querySelector('[data-role="edit-input"]').value, 10);
+      if(isNaN(val) || val < 0){
+        showToast('اكتب رقم صحيح');
+        return;
+      }
+      applyChange(key, val, {bumpInitial:true});
+    }
+  });
+
+  listEl.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && e.target.matches('[data-role="edit-input"]')){
+      e.target.closest('.prayer-card').querySelector('[data-action="confirm-edit"]').click();
+    }
+  });
+
+  /* ---------- reset ---------- */
+  function openModal(){ confirmModalEl.hidden = false; }
+  function closeModal(){ confirmModalEl.hidden = true; }
+
+  resetBtn.addEventListener('click', openModal);
+  modalCancelBtn.addEventListener('click', closeModal);
+  confirmModalEl.addEventListener('click', function(e){ if(e.target === confirmModalEl) closeModal(); });
+
+  modalConfirmBtn.addEventListener('click', function(){
+    stopReminder();
+    lsRemove(LS_STATE);
+    lsRemove(LS_HISTORY);
+    lsRemove(LS_REMINDER);
+    state = null;
+    history = [];
+    reminderSettings = {enabled:false, hours:6};
+    closeModal();
+    showSetupScreen();
+    showToast('اتصفّرت كل البيانات');
+  });
+
+  /* ---------- reminders ---------- */
+  function stopReminder(){
+    if(reminderTimer){ clearInterval(reminderTimer); reminderTimer = null; }
+  }
+  function fireReminder(){
+    if('Notification' in window && Notification.permission === 'granted'){
+      try{
+        new Notification('تذكير بقضاء الصلوات', { body: 'متنساش تسجّل اللي قضيته النهاردة' });
+      }catch(e){}
+    }
+  }
+  function startReminder(hours){
+    stopReminder();
+    reminderTimer = setInterval(fireReminder, hours * 60 * 60 * 1000);
+  }
+  function setReminderUI(){
+    if(!('Notification' in window)){
+      reminderNoteEl.textContent = 'متصفحك أو الواجهة اللي شغال جواها مش بتدعم إشعارات الصفحات دلوقتي.';
+      reminderToggleEl.disabled = true;
+      return;
+    }
+    reminderToggleEl.checked = !!reminderSettings.enabled;
+    reminderFreqEl.value = String(reminderSettings.hours || 6);
+    reminderFreqWrapEl.classList.toggle('active', reminderSettings.enabled);
+    if(reminderSettings.enabled && Notification.permission === 'granted'){
+      startReminder(reminderSettings.hours || 6);
+    }
+    if(Notification.permission === 'denied'){
+      reminderNoteEl.textContent = 'الإشعارات متمنوعة من إعدادات المتصفح أو الجهاز، فعّلها من هناك الأول.';
+    }
+  }
+  reminderToggleEl.addEventListener('change', function(){
+    if(reminderToggleEl.checked){
+      if(Notification.permission !== 'granted'){
+        Notification.requestPermission().then(function(perm){
+          if(perm !== 'granted'){
+            reminderToggleEl.checked = false;
+            showToast('محتاجين إذن الإشعارات عشان التذكير يشتغل');
+            return;
+          }
+          reminderSettings.enabled = true;
+          reminderSettings.hours = parseInt(reminderFreqEl.value, 10);
+          reminderFreqWrapEl.classList.add('active');
+          startReminder(reminderSettings.hours);
+          lsSet(LS_REMINDER, reminderSettings);
+          showToast('التذكير اتفعّل');
+        });
+        return;
+      }
+      reminderSettings.enabled = true;
+      reminderSettings.hours = parseInt(reminderFreqEl.value, 10);
+      reminderFreqWrapEl.classList.add('active');
+      startReminder(reminderSettings.hours);
+      lsSet(LS_REMINDER, reminderSettings);
+      showToast('التذكير اتفعّل');
+    } else {
+      reminderSettings.enabled = false;
+      reminderFreqWrapEl.classList.remove('active');
+      stopReminder();
+      lsSet(LS_REMINDER, reminderSettings);
+      showToast('التذكير اتوقف');
+    }
+  });
+  reminderFreqEl.addEventListener('change', function(){
+    reminderSettings.hours = parseInt(reminderFreqEl.value, 10);
+    if(reminderSettings.enabled){ startReminder(reminderSettings.hours); }
+    lsSet(LS_REMINDER, reminderSettings);
+  });
+
+  /* ---------- init ---------- */
+  (function init(){
+    if(!hasStorage){
+      showToast('التخزين المحلي مش متاح دلوقتي، أي بيانات هتتفقد لو قفلت الصفحة');
+    }
+    applyTheme(currentTheme());
+
+    state = lsGet(LS_STATE);
+    history = lsGet(LS_HISTORY) || [];
+    var rs = lsGet(LS_REMINDER);
+    if(rs) reminderSettings = rs;
+
+    if(state){
+      enterApp();
+    } else {
+      showSetupScreen();
+    }
+  })();
+
+})();
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js');
+    });
+  }
+</script>
+</body>
+</html>
